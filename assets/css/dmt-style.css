@@ -1,0 +1,140 @@
+/* Simple Dark Mode Toggle
+ * Dark mode = the whole page is colour-inverted (white -> black, black text -> white),
+ * then images, video, iframes and inline background images are inverted back
+ * so they keep their natural colours. Works on any theme without knowing its CSS.
+ */
+
+/* ---------- Dark mode ---------- */
+html[data-dmt="dark"] {
+	background-color: #fff; /* becomes pure black after inversion */
+	filter: invert(1) hue-rotate(180deg);
+}
+
+html[data-dmt="dark"] img,
+html[data-dmt="dark"] video,
+html[data-dmt="dark"] canvas,
+html[data-dmt="dark"] iframe,
+html[data-dmt="dark"] embed,
+html[data-dmt="dark"] object,
+html[data-dmt="dark"] [style*="background-image"] {
+	filter: invert(1) hue-rotate(180deg);
+}
+
+/* Avoid double inversion for media nested in an already re-inverted element. */
+html[data-dmt="dark"] [style*="background-image"] img,
+html[data-dmt="dark"] [style*="background-image"] video {
+	filter: none;
+}
+
+/* Smooth switch (class is added by the script after first paint). */
+html.dmt-ready {
+	transition: filter 0.25s ease;
+}
+
+/* ---------- Floating button ---------- */
+.dmt-toggle {
+	all: initial;
+	box-sizing: border-box;
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 2147483000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border: 2px solid rgba(255, 255, 255, 0.25);
+	border-radius: 50%;
+	background: #1f2937;
+	color: #fff;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hidden until JavaScript is running (the button is useless without it). */
+html:not(.dmt-js) .dmt-toggle {
+	display: none;
+}
+
+.dmt-toggle:hover {
+	transform: scale(1.08);
+}
+
+.dmt-toggle:focus-visible {
+	outline: 3px solid #3b82f6;
+	outline-offset: 2px;
+}
+
+/* Dark mode active: show a light button (it is re-inverted below, so it
+ * appears exactly as designed on the black page). */
+.dmt-toggle[aria-pressed="true"] {
+	border-color: rgba(0, 0, 0, 0.15);
+	background: #f9fafb;
+	color: #111827;
+}
+
+html[data-dmt="dark"] .dmt-toggle {
+	filter: invert(1) hue-rotate(180deg);
+}
+
+/* Icons: moon in light mode (click -> dark), sun in dark mode (click -> light). */
+.dmt-icon {
+	display: block;
+	width: 22px;
+	height: 22px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	pointer-events: none;
+}
+
+.dmt-icon--sun {
+	display: none;
+}
+
+html[data-dmt="dark"] .dmt-icon--moon {
+	display: none;
+}
+
+html[data-dmt="dark"] .dmt-icon--sun {
+	display: block;
+}
+
+/* ---------- Mobile: 80px from the bottom ---------- */
+@media (max-width: 768px) {
+	.dmt-toggle {
+		bottom: 80px;
+	}
+}
+
+/* ---------- Accessibility / print ---------- */
+@media (prefers-reduced-motion: reduce) {
+	html.dmt-ready,
+	.dmt-toggle {
+		transition: none;
+	}
+}
+
+@media print {
+	.dmt-toggle {
+		display: none !important;
+	}
+
+	html[data-dmt="dark"] {
+		background-color: transparent;
+		filter: none;
+	}
+
+	html[data-dmt="dark"] img,
+	html[data-dmt="dark"] video,
+	html[data-dmt="dark"] canvas,
+	html[data-dmt="dark"] iframe,
+	html[data-dmt="dark"] [style*="background-image"] {
+		filter: none;
+	}
+}
